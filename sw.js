@@ -1,6 +1,6 @@
 // Focus Timer service worker: cache the app shell and the large TTS assets
 // so the voice model survives app restarts without re-downloading.
-const CACHE = "focus-timer-v9";
+const CACHE = "focus-timer-v10";
 
 const APP_SHELL = [
   "./",

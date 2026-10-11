@@ -27,7 +27,15 @@ The codebase is intentionally modular:
 - When running on static hosts without pre-downloaded local assets (such as GitHub Pages), `app.js` automatically falls back to upstream Hugging Face and jsDelivr URLs.
 - Do not remove or alter `fetchAssetWithFallback` or remote asset fallbacks.
 
-## 5. Testing & Verification
+## 5. Local Storage & Task List Persistence
+- The timer queue is automatically saved to browser `localStorage` (`focus_timer_queue_v1`) whenever tasks are added, removed, reordered, imported, or cleared.
+- Saved tasks persist across page reloads and PWA app restarts.
+- Cues, durations, voice selections, and repeat intervals are restored on startup.
+
+## 6. Ideas & Backlog (`TODO.md`)
+- `TODO.md` is reserved for documenting planned features, enhancements, and backlog items not yet ready for immediate implementation.
+
+## 7. Testing & Verification
 - Verify that changes compile cleanly (`compile_applet`).
 - Verify that `version.txt` is served correctly and rendered in the DOM.
 - Verify that adding cues up to 128 characters works as expected.

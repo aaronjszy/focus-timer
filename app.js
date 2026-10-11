@@ -29,6 +29,7 @@
       var copyDebugBtn = document.getElementById('copyDebugBtn');
       var exportListBtn = document.getElementById('exportListBtn');
       var importListBtn = document.getElementById('importListBtn');
+      var clearListBtn = document.getElementById('clearListBtn');
       var transferPanel = document.getElementById('transferPanel');
       var transferTitle = document.getElementById('transferTitle');
       var transferHelp = document.getElementById('transferHelp');
@@ -115,13 +116,22 @@
       function allTracksReady() {
         return queue.length > 0 && queue.every(function (item) { return !!item.url; });
       }
-      function makeTrack(cue, duration) {
+      var STORAGE_KEY = 'focus_timer_queue_v1';
+
+      function makeTrack(cue, duration, voiceText, voiceId, interval) {
+        var vId = voiceId || voiceSelect.value;
+        var vText = voiceText;
+        if (!vText) {
+          var opt = voiceSelect.options[voiceSelect.selectedIndex];
+          vText = opt ? opt.text : 'Bella';
+        }
+        var intVal = interval != null ? Number(interval) : Number(intervalSelect.value);
         return {
           id: nextId++,
           cue: cue,
-          voice: voiceSelect.options[voiceSelect.selectedIndex].text,
-          voiceId: voiceSelect.value,
-          interval: Number(intervalSelect.value),
+          voice: vText,
+          voiceId: vId,
+          interval: intVal,
           duration: duration,
           minuteCues: {},
           doneCue: null,
@@ -131,6 +141,72 @@
           buildError: false,
           removed: false
         };
+      }
+
+      function saveQueueToStorage() {
+        try {
+          var serialized = queue.map(function (item) {
+            return {
+              cue: item.cue,
+              duration: item.duration,
+              voice: item.voice,
+              voiceId: item.voiceId,
+              interval: item.interval
+            };
+          });
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(serialized));
+        } catch (error) {}
+      }
+
+      function loadQueueFromStorage() {
+        try {
+          var raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) return false;
+          var list = JSON.parse(raw);
+          if (!Array.isArray(list) || !list.length) return false;
+          var loaded = [];
+          for (var i = 0; i < list.length && i < 12; i++) {
+            var item = list[i];
+            if (!item || typeof item.cue !== 'string') continue;
+            var cue = item.cue.trim();
+            var duration = Number(item.duration);
+            if (!cue || isNaN(duration) || duration < 1 || duration > 60) continue;
+            loaded.push(makeTrack(cue, duration, item.voice, item.voiceId, item.interval));
+          }
+          if (!loaded.length) return false;
+          queue = loaded;
+          activeIndex = 0;
+          totalMs = queue[0].duration * 60000;
+          remainingMs = totalMs;
+          statusText.textContent = 'Playlist ready to build';
+          screenNote.textContent = 'Add another timer, rearrange the list, or start the playlist.';
+          return true;
+        } catch (error) {
+          return false;
+        }
+      }
+
+      function clearQueue() {
+        if (preparing || state === 'running' || !queue.length) return;
+        stopTicking();
+        audio.pause();
+        audio.removeAttribute('src');
+        queue.forEach(function (item) {
+          item.removed = true;
+          if (item.url) URL.revokeObjectURL(item.url);
+        });
+        queue = [];
+        activeIndex = -1;
+        totalMs = 0;
+        remainingMs = 0;
+        state = 'idle';
+        timerPanel.classList.remove('running', 'flash');
+        resetBtn.disabled = true;
+        statusText.textContent = 'Ready when you are';
+        screenNote.textContent = 'Add timers in the order you want to complete them.';
+        saveQueueToStorage();
+        updateReadiness();
+        renderTimer();
       }
       function serializeQueue() {
         return queue.map(function (item) { return item.cue + ' ' + item.duration; }).join('\n');
@@ -312,6 +388,7 @@
         testCueBtn.disabled = locked || previewing || !cleanCue() || state === 'running';
         importListBtn.disabled = locked || state === 'running' || state === 'paused';
         applyImportBtn.disabled = locked || state === 'running' || state === 'paused';
+        clearListBtn.disabled = locked || state === 'running' || !queue.length;
         Array.prototype.forEach.call(queueList.querySelectorAll('.queue-action'), function (button) {
           button.disabled = locked;
         });
@@ -374,6 +451,7 @@
         exportListBtn.disabled = !queue.length;
         importListBtn.disabled = preparing || state === 'running' || state === 'paused';
         applyImportBtn.disabled = preparing || state === 'running' || state === 'paused';
+        clearListBtn.disabled = preparing || state === 'running' || !queue.length;
         if (!transferPanel.hidden && !copyListBtn.hidden) transferText.value = serializeQueue();
       }
 
@@ -440,6 +518,7 @@
           if (item.url) URL.revokeObjectURL(item.url);
         });
         queue = imported.map(function (item) { return makeTrack(item.cue, item.duration); });
+        saveQueueToStorage();
         activeIndex = 0;
         state = 'idle';
         totalMs = queue[0].duration * 60000;
@@ -458,6 +537,7 @@
         if (!cue || preparing || queue.length >= 12) return;
         var item = makeTrack(cue, durationMinutes);
         queue.push(item);
+        saveQueueToStorage();
         if (activeIndex < 0) {
           activeIndex = 0;
           totalMs = queue[0].duration * 60000;
@@ -484,6 +564,7 @@
         item.removed = true;
         if (item.url) URL.revokeObjectURL(item.url);
         queue.splice(index, 1);
+        saveQueueToStorage();
         if (index < activeIndex) activeIndex--;
         if (!queue.length) activeIndex = -1;
         else activeIndex = Math.min(activeIndex, queue.length - 1);
@@ -525,6 +606,7 @@
         var activeId = currentTrack() ? currentTrack().id : null;
         var moved = queue.splice(index, 1)[0];
         queue.splice(target, 0, moved);
+        saveQueueToStorage();
         if (activeId !== null) activeIndex = queue.findIndex(function (item) { return item.id === activeId; });
         screenNote.textContent = state === 'running' ? 'Queue updated. The active task keeps playing.' : (state === 'paused' ? 'Queue updated. The playlist remains paused.' : 'Timer list reordered.');
         syncMediaSession(state === 'running');
@@ -668,7 +750,6 @@
       }
 
       async function getSynthesizer(index) {
-        window._preloadSynthesizer = getSynthesizer;
         if (!kittenModulePromise) {
           if (typeof window.importShim !== 'function') throw new Error('Kitten TTS loader unavailable');
           addAudioDebug('module', 'loading browser library');
@@ -685,11 +766,11 @@
         }
         if (!synthesizerPromise) {
           if (preparing) {
-            var message = 'Downloading Kitten voice model…';
-            recordNote.textContent = message;
+            var message = 'Preparing voice engine…';
+            recordNote.textContent = 'Loading voice model & audio runtime…';
             startBtn.textContent = message;
           } else if (previewing) {
-            recordNote.textContent = 'Downloading Kitten voice model for the first preview…';
+            recordNote.textContent = 'Preparing voice engine for preview…';
           }
           addAudioDebug('model', 'loading browser ONNX model');
           synthesizerPromise = kittenModulePromise.then(loadBrowserSynthesizer).then(function (synthesizer) {
@@ -705,6 +786,7 @@
         }
         return synthesizerPromise;
       }
+      window._preloadSynthesizer = getSynthesizer;
 
       async function generateSpeech(synthesizer, text, voiceId) {
         var kitten = await kittenModulePromise;
@@ -869,10 +951,12 @@
             renderTimer();
             if (!item.doneCue || cueMinuteValues(item).some(function (minutes) { return !item.minuteCues[minutes]; })) {
               recordNote.textContent = 'Creating spoken countdown for “' + item.cue + '” with ' + item.voice + ' — track ' + (i + 1) + ' of ' + queue.length + '.';
-              startBtn.textContent = 'Creating track ' + (i + 1) + ' of ' + queue.length + '…';
+              startBtn.textContent = 'Preparing cues for track ' + (i + 1) + ' of ' + queue.length + '…';
               var synthesizer = await getSynthesizer(i);
+              startBtn.textContent = 'Generating spoken prompts (track ' + (i + 1) + ' of ' + queue.length + ')…';
               await prepareTrackAnnouncements(item, synthesizer, function (announcement, totalAnnouncements) {
                 recordNote.textContent = 'Creating announcement ' + announcement + ' of ' + totalAnnouncements + ' for “' + item.cue + '”.';
+                startBtn.textContent = 'Generating prompt ' + announcement + ' of ' + totalAnnouncements + ' (track ' + (i + 1) + ')…';
               });
             }
             if (!item.url) {
@@ -1194,6 +1278,7 @@
       importListBtn.addEventListener('click', openImportPanel);
       copyListBtn.addEventListener('click', copyTransferText);
       applyImportBtn.addEventListener('click', applyImportedList);
+      clearListBtn.addEventListener('click', clearQueue);
       closeTransferBtn.addEventListener('click', closeTransferPanel);
       queueList.addEventListener('pointerdown', startQueueDrag);
       document.addEventListener('pointermove', continueQueueDrag, { passive: false });
@@ -1277,6 +1362,7 @@
           .catch(function () {});
       }
       loadVersion();
+      loadQueueFromStorage();
       updateReadiness();
       renderTimer();
 
