@@ -27,3 +27,26 @@ make assets
 ## Note
 
 This repo is a snapshot for local development. The installable PWA is built and hosted separately.
+
+## Self-hosting
+
+The Muse share link wraps the app in a Muse page (banner, Muse shortcut name,
+shortcut opens the share URL). To host it yourself:
+
+1. Download the latest exported `focus-timer.html` and save it over the one in
+   this repo.
+2. Run `make assets` to download the voice model, voices, and WASM runtime
+   (not committed).
+3. Run `make package` to build `focus-timer-pwa.zip`.
+4. Unzip the zip on any static host (your NAS, GitHub Pages, Cloudflare
+   Pages). Serve over HTTPS (or localhost): the app needs a secure context.
+5. Install from your own URL: the shortcut will be named "Focus Timer" from
+   `manifest.webmanifest`, with no Muse banner.
+
+Notes:
+- The zip has no service worker (the single-file export doesn't include one),
+  so install via "Add to Home screen". Offline use is not supported.
+- If the app can't find an asset when self-hosted, its debug log names the
+  exact path it tried; adjust the `assets/` layout in the Makefile to match.
+- To use your own icon, add 192px and 512px PNGs and list them in the
+  `icons` array in `manifest.webmanifest`.
