@@ -2,6 +2,7 @@
 assets/
 *.onnx
 *.bin
+*.wasm
 
 # OS / editor junk
 .DS_Store
