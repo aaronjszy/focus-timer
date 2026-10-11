@@ -6,7 +6,7 @@ const CACHE = "focus-timer-v2";
 
 const ASSET_TARGETS = {
   "model_quantized.onnx": "assets/kitten/model_quantized.onnx",
-  "ort-wasm-simd-threaded.jsep.wasm": "assets/ort-wasm-simd-threaded.jsep.wasm",
+  "ort-wasm-simd-threaded.jsep.wasm": "assets/ort/ort-wasm-simd-threaded.jsep.wasm",
 };
 
 function voiceTarget(filename) {
