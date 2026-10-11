@@ -26,11 +26,11 @@
     <section class="shell" id="app" aria-label="Spoken focus countdown">
       <div class="setup">
         <h1>Build your focus queue</h1><p style="font-size:12px;opacity:0.6;margin-top:4px;">v2026.10.11.3</p>
-        <p class="intro">Give each task one cue word and its own timer. Reorder the list anytime, and keep editing the other tasks while one runs.</p>
+        <p class="intro">Give each task a concise cue descriptor and its own timer. Reorder the list anytime, and keep editing the other tasks while one runs.</p>
 
         <div class="field">
           <label for="cueInput">Spoken cue</label>
-          <input class="cue-input" id="cueInput" type="text" maxlength="24" placeholder="One word" autocomplete="off" spellcheck="true" inputmode="text" />
+          <input class="cue-input" id="cueInput" type="text" maxlength="64" placeholder="Concise descriptor" autocomplete="off" spellcheck="true" inputmode="text" />
         </div>
 
         <div class="field">
@@ -48,7 +48,7 @@
         </div>
 
         <div class="field">
-          <label for="intervalSelect">Repeat the word</label>
+          <label for="intervalSelect">Repeat cue interval</label>
           <select id="intervalSelect">
             <option value="5">Every 5 seconds</option>
             <option value="10">Every 10 seconds</option>
@@ -77,7 +77,7 @@
         </button>
         <section class="debug-panel" id="debugPanel" aria-live="polite" hidden>
           <p class="debug-title">Audio debug log</p>
-          <p class="debug-copy">Copy this log if audio still fails. It includes the failing step, but not your cue words.</p>
+          <p class="debug-copy">Copy this log if audio still fails. It includes the failing step, but not your cue text.</p>
           <textarea class="debug-log" id="debugLog" readonly aria-label="Audio debug log"></textarea>
           <button class="copy-debug" id="copyDebugBtn" type="button">Copy debug log</button>
         </section>

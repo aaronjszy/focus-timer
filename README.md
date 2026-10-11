@@ -1,10 +1,10 @@
 # Focus Timer
 
-A spoken cue timer PWA, an ADHD focus aid. You type a single word for the task, and the app speaks it on a repeating interval while a countdown runs, even with the phone screen off.
+A spoken cue timer PWA, an ADHD focus aid. You type a concise descriptor for the task, and the app speaks it on a repeating interval while a countdown runs, even with the phone screen off.
 
 ## How it works
 
-- One Start button: downloads the Kitten TTS Nano voice model on first run, generates the cue word, builds a full-session audio track with the word on repeat, and plays it like music so it keeps going with the screen locked.
+- One Start button: downloads the Kitten TTS Nano voice model on first run, generates the spoken cue, builds a full-session audio track with the cue on repeat, and plays it like music so it keeps going with the screen locked.
 - Playlist: queue multiple task timers, one track per task, auto-advancing, with headphone next/previous controls.
 - Export/import timer lists as line-delimited text (`task name minutes`) via clipboard.
 
