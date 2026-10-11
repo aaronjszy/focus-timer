@@ -1,6 +1,6 @@
 // Focus Timer service worker: cache the app shell and the large TTS assets
 // so the voice model survives app restarts without re-downloading.
-const CACHE = "focus-timer-v6";
+const CACHE = "focus-timer-v7";
 
 const APP_SHELL = [
   "./",
@@ -31,7 +31,7 @@ self.addEventListener("install", (e) => {
   e.waitUntil(
     caches.open(CACHE)
       .then((c) => c.addAll(APP_SHELL))
-      // Pre-cache TTS assets in the background; don't block install on them.
+      // Pre-cache local TTS assets if present; don't block install on them.
       .then(() => {
         caches.open(CACHE).then((c) =>
           Promise.allSettled(TTS_ASSETS.map((u) => c.add(u)))
@@ -54,10 +54,14 @@ self.addEventListener("activate", (e) => {
 self.addEventListener("fetch", (e) => {
   if (e.request.method !== "GET") return;
   const url = new URL(e.request.url);
-  if (url.origin !== location.origin) return;
+  const isCdnAsset = (
+    url.origin === "https://huggingface.co" ||
+    url.origin === "https://cdn.jsdelivr.net"
+  );
+  if (url.origin !== location.origin && !isCdnAsset) return;
 
-  // Cache-first for all same-origin GETs. Large assets stay cached across
-  // restarts, so the model is not re-downloaded.
+  // Cache-first for all same-origin and designated CDN TTS/WASM assets.
+  // Large assets stay cached across restarts, so the model is not re-downloaded.
   e.respondWith(
     caches.match(e.request).then(
       (hit) =>
