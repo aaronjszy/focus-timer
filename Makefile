@@ -31,7 +31,7 @@ serve:
 
 assets:
 	mkdir -p $(KITTEN_DIR)/voices
-	curl -sSL -o $(KITTEN_DIR)/model_quantized.onnx $(HF_BASE)/model_quantized.onnx
+	curl -sSL -o $(KITTEN_DIR)/model_quantized.onnx $(HF_BASE)/onnx/model_quantized.onnx
 	for v in $(VOICES); do \
 		curl -sSL -o $(KITTEN_DIR)/voices/$$v.bin $(HF_BASE)/voices/$$v.bin; \
 	done
