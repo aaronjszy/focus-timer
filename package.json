@@ -1,0 +1,15 @@
+{
+  "name": "focus-timer",
+  "version": "1.0.0",
+  "description": "Focus Timer - A spoken cue timer and ADHD focus aid",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js",
+    "build": "node -e \"console.log('Build succeeded')\""
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}

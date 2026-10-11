@@ -1,0 +1,8 @@
+{
+  "name": "Focus Timer",
+  "description": "A spoken cue countdown timer and ADHD focus aid with customizable audio cues and interval alerts.",
+  "permissions": [],
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
