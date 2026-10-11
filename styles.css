@@ -67,6 +67,14 @@ h1 {
   margin: 0 0 12px;
   max-width: 9ch;
 }
+.app-version {
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  opacity: 0.7;
+  margin: -6px 0 16px;
+  font-variant-numeric: tabular-nums;
+}
 .intro {
   max-width: 34ch;
   margin: 0 0 30px;
@@ -350,12 +358,13 @@ body.is-sorting { user-select: none; cursor: grabbing; }
 }
 .cue-word {
   max-width: 100%;
-  margin: 0 0 4px;
+  margin: 0 0 6px;
   overflow-wrap: anywhere;
+  word-break: break-word;
   font-family: "Barlow Condensed", sans-serif;
   font-weight: 700;
-  font-size: clamp(1.35rem, 4vw, 2.25rem);
-  line-height: 1;
+  font-size: clamp(1.15rem, 3.5vw, 1.95rem);
+  line-height: 1.15;
   color: var(--signal);
 }
 .time {

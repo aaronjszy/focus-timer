@@ -193,7 +193,7 @@
           }
           var cue = match[1].trim();
           var minutes = Number(match[2]);
-          if (cue.length > 64) throw new Error('Line ' + (lineIndex + 1) + ' has a cue descriptor longer than 64 characters.');
+          if (cue.length > 128) throw new Error('Line ' + (lineIndex + 1) + ' has a cue descriptor longer than 128 characters.');
           if (minutes < 1 || minutes > 60) throw new Error('Line ' + (lineIndex + 1) + ' must use 1–60 minutes.');
           items.push({ cue: cue, duration: minutes });
           if (items.length > 12) throw new Error('A timer list can contain at most 12 lines.');
@@ -1262,6 +1262,21 @@
           navigator.mediaSession.setActionHandler('previoustrack', previousTrack);
         } catch (error) {}
       }
+      function loadVersion() {
+        var versionEl = document.getElementById('appVersion');
+        if (!versionEl) return;
+        fetch('version.txt', { cache: 'no-cache' })
+          .then(function (res) {
+            if (res.ok) return res.text();
+            throw new Error('version.txt not found');
+          })
+          .then(function (text) {
+            var v = text.trim();
+            if (v) versionEl.textContent = v;
+          })
+          .catch(function () {});
+      }
+      loadVersion();
       updateReadiness();
       renderTimer();
 
