@@ -1,20 +1,10 @@
-// Focus Timer service worker v3: passthrough (no caching, no routing).
-// Used to diagnose whether the worker was causing asset 404s.
-const CACHE = "focus-timer-v3";
-
+// Focus Timer service worker v4: self-unregister.
+// The worker was interfering with asset fetches. This version removes itself.
 self.addEventListener("install", (e) => {
-  e.waitUntil(self.skipWaiting());
-});
-
-self.addEventListener("activate", (e) => {
   e.waitUntil(
     caches.keys().then((keys) =>
       Promise.all(keys.map((k) => caches.delete(k)))
-    ).then(() => self.clients.claim())
+    ).then(() => self.registration.unregister())
+     .then(() => self.skipWaiting())
   );
-});
-
-self.addEventListener("fetch", (e) => {
-  // Passthrough: let every request go to the network.
-  e.respondWith(fetch(e.request));
 });
