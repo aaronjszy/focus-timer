@@ -1,0 +1,12 @@
+# Downloaded TTS model assets (fetch with `make assets`)
+assets/
+*.onnx
+*.bin
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
+*.swp
+*~
+.vscode/
+.idea/
