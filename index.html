@@ -1229,6 +1229,7 @@
       }
 
       async function getSynthesizer(index) {
+        window._preloadSynthesizer = getSynthesizer;
         if (!kittenModulePromise) {
           if (typeof window.importShim !== 'function') throw new Error('Kitten TTS loader unavailable');
           addAudioDebug('module', 'loading browser library');
@@ -1849,6 +1850,18 @@
   };
   document.body.appendChild(btn);
 })();
+</script>
+<script>
+// Background preload the voice model on app start (2026-10-11).
+// getSynthesizer caches its promise, so this warms it without blocking UI.
+// When Start is pressed later, the cached (or in-flight) promise is reused.
+window.addEventListener('load', function() {
+  setTimeout(function() {
+    try {
+      if (window._preloadSynthesizer) window._preloadSynthesizer(0);
+    } catch (e) { /* Start will retry on failure */ }
+  }, 1500);
+});
 </script>
 </body>
 </html>
