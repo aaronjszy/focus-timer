@@ -50,7 +50,7 @@ assets:
 package:
 	rm -rf $(DIST_DIR) $(PACKAGE_ZIP)
 	mkdir -p $(DIST_DIR)
-	cp index.html manifest.webmanifest sw.js $(DIST_DIR)/
+	cp index.html styles.css app.js manifest.webmanifest sw.js $(DIST_DIR)/
 	cp focus-timer-icon-192.png focus-timer-icon-512.png $(DIST_DIR)/
 	@if [ -d $(KITTEN_DIR) ]; then cp -r $(ASSETS_DIR) $(DIST_DIR)/; \
 	else echo "WARNING: $(KITTEN_DIR) missing, run 'make assets' first."; fi
