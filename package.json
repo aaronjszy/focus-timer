@@ -1,6 +1,6 @@
 {
   "name": "focus-timer",
-  "version": "1.0.4",
+  "version": "1.0.7",
   "description": "Focus Timer - A spoken cue timer and ADHD focus aid",
   "type": "module",
   "private": true,

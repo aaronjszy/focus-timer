@@ -165,7 +165,7 @@
           var list = JSON.parse(raw);
           if (!Array.isArray(list) || !list.length) return false;
           var loaded = [];
-          for (var i = 0; i < list.length && i < 12; i++) {
+          for (var i = 0; i < list.length; i++) {
             var item = list[i];
             if (!item || typeof item.cue !== 'string') continue;
             var cue = item.cue.trim();
@@ -272,7 +272,6 @@
           if (cue.length > 128) throw new Error('Line ' + (lineIndex + 1) + ' has a cue descriptor longer than 128 characters.');
           if (minutes < 1 || minutes > 60) throw new Error('Line ' + (lineIndex + 1) + ' must use 1–60 minutes.');
           items.push({ cue: cue, duration: minutes });
-          if (items.length > 12) throw new Error('A timer list can contain at most 12 lines.');
         }
         if (!items.length) throw new Error('Paste at least one timer line.');
         return items;
@@ -384,7 +383,7 @@
         intervalSelect.disabled = locked;
         minusBtn.disabled = locked;
         plusBtn.disabled = locked;
-        addTrackBtn.disabled = locked || !cleanCue() || queue.length >= 12;
+        addTrackBtn.disabled = locked || !cleanCue();
         testCueBtn.disabled = locked || previewing || !cleanCue() || state === 'running';
         importListBtn.disabled = locked || state === 'running' || state === 'paused';
         applyImportBtn.disabled = locked || state === 'running' || state === 'paused';
@@ -447,7 +446,7 @@
             queueList.appendChild(row);
           });
         }
-        addTrackBtn.disabled = preparing || !cleanCue() || queue.length >= 12;
+        addTrackBtn.disabled = preparing || !cleanCue();
         exportListBtn.disabled = !queue.length;
         importListBtn.disabled = preparing || state === 'running' || state === 'paused';
         applyImportBtn.disabled = preparing || state === 'running' || state === 'paused';
@@ -495,7 +494,7 @@
           startBtn.disabled = false;
           recordNote.textContent = 'Start will create every cue and build one audio track per task.';
         }
-        addTrackBtn.disabled = !cleanCue() || queue.length >= 12;
+        addTrackBtn.disabled = !cleanCue();
       }
 
       function applyImportedList() {
@@ -534,7 +533,7 @@
 
       function addTrack() {
         var cue = cleanCue();
-        if (!cue || preparing || queue.length >= 12) return;
+        if (!cue || preparing) return;
         var item = makeTrack(cue, durationMinutes);
         queue.push(item);
         saveQueueToStorage();
@@ -1010,7 +1009,7 @@
           previewing = false;
           voiceSelect.disabled = false;
           testCueBtn.disabled = !cleanCue() || preparing || state === 'running';
-          addTrackBtn.disabled = !cleanCue() || preparing || queue.length >= 12;
+          addTrackBtn.disabled = !cleanCue() || preparing;
         }
       }
 
@@ -1258,7 +1257,7 @@
       }
 
       cueInput.addEventListener('input', function () {
-        addTrackBtn.disabled = !cleanCue() || queue.length >= 12;
+        addTrackBtn.disabled = !cleanCue();
         testCueBtn.disabled = !cleanCue() || preparing || previewing || state === 'running';
       });
       cueInput.addEventListener('keydown', function (event) {
